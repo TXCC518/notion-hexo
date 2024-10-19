@@ -8,4 +8,4 @@ date: 2023-11-08 20:48:34
 - 博客主题：[Butterfly@4.10.0](https://github.com/jerryc127/hexo-theme-butterfly)
 - 博客文档同步：[Elog](https://github.com/LetTTGACO/elog)
 - 部署平台：Vercel
-- 博客仓库：[https://github.com/LetTTGACO/notion-hexo](https://github.com/LetTTGACO/notion-hexo)
+- GitHub仓库地址：[https://github.com/TXCC518](https://github.com/TXCC518)

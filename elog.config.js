@@ -24,10 +24,16 @@ module.exports = {
   },
   image: {
     enable: true,
-    platform: 'local',
-    local: {
-      outputDir: './source/images',
-      prefixKey: '/images'
+    platform: 'cos',
+    cos: {
+      secretId: process.env.COS_SECRET_ID,
+      secretKey: process.env.COS_SECRET_KEY,
+      bucket: process.env.COS_BUCKET,
+      region: process.env.COS_REGION
     }
+    // local: {
+    //   outputDir: './source/images',
+    //   prefixKey: '/images'
+    // }
   },
 }
