@@ -41,6 +41,7 @@ jobs:
         run: |
           git config --global user.email "2878951910@qq.com"
           git config --global user.name "TXCC518"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/TXCC518/notion-hexo.git
       - name: Hexo deploy
         if: steps.NotionSync.outputs.updated_count != '0'
         run: |
