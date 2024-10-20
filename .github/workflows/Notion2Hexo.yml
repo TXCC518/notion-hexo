@@ -37,11 +37,12 @@ jobs:
           metas_keeped: abbrlink
           metas_excluded: pstatus,ptype
           last_sync_datetime: ${{ steps.GetNotionSyncDatetime.outputs.NOTION_SYNC_DATETIME }}
-      - name: Set up Git
+      - name: Set up SSH
         run: |
-          git config --global user.email "2878951910@qq.com"
-          git config --global user.name "TXCC518"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/TXCC518/notion-hexo.git
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
       - name: Hexo deploy
         if: steps.NotionSync.outputs.updated_count != '0'
         run: |
