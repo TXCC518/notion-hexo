@@ -46,8 +46,8 @@ jobs:
           echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git config --global user.name $GIT_USER
-          git config --global user.email $GIT_EMAIL
+          git config --global user.name "TXCC518"
+          git config --global user.email "2878951910@qq.com"
       - name: Hexo deploy
         if: steps.NotionSync.outputs.updated_count != '0'
         run: |
