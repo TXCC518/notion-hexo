@@ -1,50 +1,41 @@
-name: CI
-
+name: Notion2Hexo
 on:
-  push:
-    branches:
-      - master
-
-env:
-  GIT_USER: TXCC518
-  GIT_EMAIL: 2878951910@qq.com
-  THEME_REPO: TXCC518/notion-hexo
-  THEME_BRANCH: master
-  DEPLOY_REPO: TXCC518/txcc518.github.io
-  DEPLOY_BRANCH: main
-
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 1-17/1 * * *'
+permissions:
+  contents: write
 jobs:
-  build:
-    name: Build on node ${{ matrix.node_version }} and ${{ matrix.os }}
+  notionSyncTask:
+    name: Notion2hexo on ubuntu-latest
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node_version: [16.x]
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Checkout theme repo
-        uses: actions/checkout@v4
+      - name: Checkout blog and theme
+        uses: actions/checkout@v3
         with:
-          repository: ${{ env.THEME_REPO }}
-          ref: ${{ env.THEME_BRANCH }}
-          path: themes/concise
-
-      - name: Checkout deploy repo
-        uses: actions/checkout@v4
+          submodules: 'recursive'
+          fetch-depth: 0
+      - name: Check the NOTION_SYNC_DATETIME
+        id: GetNotionSyncDatetime
+        run: |
+          NOTION_SYNC_DATETIME=$(git log -n 1 --grep="NotionSync" --format="%aI")
+          echo "NOTION_SYNC_DATETIME=$NOTION_SYNC_DATETIME" >> "$GITHUB_OUTPUT"
+          echo -e "Latest notion sync datetime:\n$NOTION_SYNC_DATETIME"
+      - name: Convert notion to markdown
+        id: NotionSync
+        uses: Doradx/notion2markdown-action@v1
         with:
-          repository: ${{ env.DEPLOY_REPO }}
-          ref: ${{ env.DEPLOY_BRANCH }}
-          path: .deploy_git
-
-      - name: Use Node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node_version }}
-
+          notion_secret: ${{ secrets.NOTION_SECRET }}
+          database_id: ${{ secrets.NOTION_DATABASE_ID }}
+          pic_migrate: true
+          pic_bed_config: ${{ secrets.PICBED_CONFIG }}
+          pic_compress: true
+          output_page_dir: 'source'
+          output_post_dir: 'source/_posts/notion'
+          clean_unpublished_post: true
+          metas_keeped: abbrlink
+          metas_excluded: pstatus,ptype
+          last_sync_datetime: ${{ steps.GetNotionSyncDatetime.outputs.NOTION_SYNC_DATETIME }}
       - name: Configuration environment
         env:
           HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_PRI}}
@@ -54,14 +45,16 @@ jobs:
           echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git config --global user.name ${{ env.GIT_USER }}
-          git config --global user.email ${{ env.GIT_EMAIL }}
-          cp _config.butterfly.yml themes/concise/_config.yml
-
-      - name: Install dependencies
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+      - name: Hexo deploy
+        if: steps.NotionSync.outputs.updated_count != '0'
         run: |
-          npm install
-
-      - name: Deploy hexo
-        run: |
-          npm run deploy
+          git pull
+          npm install && npm run deploy
+      - name: Commit & Push
+        if: steps.NotionSync.outputs.updated_count != '0'
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          file_pattern: 'source/'
+          commit_message: Automatic NotionSync.
