@@ -41,6 +41,8 @@ jobs:
         if: steps.NotionSync.outputs.updated_count != '0'
         run: |
           git pull
+          git config --global user.email "2878951910@qq.com"
+          git config --global user.name "TXCC518"
           npm install && npm run deploy
       - name: Commit & Push
         if: steps.NotionSync.outputs.updated_count != '0'
