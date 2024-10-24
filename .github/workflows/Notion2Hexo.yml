@@ -18,9 +18,14 @@ jobs:
       - name: Check the NOTION_SYNC_DATETIME
         id: GetNotionSyncDatetime
         run: |
+          echo -e "Latest commit id: $(git rev-parse HEAD)"
+          echo -e "Latest notion sync commit:\n$(git log -n 1 --grep="NotionSync")"
           NOTION_SYNC_DATETIME=$(git log -n 1 --grep="NotionSync" --format="%aI")
+          echo "NOTION_SYNC_DATETIME: $NOTION_SYNC_DATETIME"
           echo "NOTION_SYNC_DATETIME=$NOTION_SYNC_DATETIME" >> "$GITHUB_OUTPUT"
-          echo -e "Latest notion sync datetime:\n$NOTION_SYNC_DATETIME"
+#          NOTION_SYNC_DATETIME=$(git log -n 1 --grep="NotionSync" --format="%aI")
+#          echo "NOTION_SYNC_DATETIME=$NOTION_SYNC_DATETIME" >> "$GITHUB_OUTPUT"
+#          echo -e "Latest notion sync datetime:\n$NOTION_SYNC_DATETIME"
       - name: Convert notion to markdown
         id: NotionSync
         uses: Doradx/notion2markdown-action@v1
